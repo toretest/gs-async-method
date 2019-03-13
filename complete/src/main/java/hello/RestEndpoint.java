@@ -1,28 +1,33 @@
 package hello;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.CompletableFuture;
 
-@Component
-public class AppRunner implements CommandLineRunner {
+@RestController
+@RequestMapping("/api")
+public class RestEndpoint {
+    private static final Logger logger = LoggerFactory.getLogger(RestEndpoint.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(AppRunner.class);
+    GitHubLookupService gitHubLookupService;
 
-    private final GitHubLookupService gitHubLookupService;
-
-    public AppRunner(GitHubLookupService gitHubLookupService) {
+    public RestEndpoint(GitHubLookupService gitHubLookupService) {
         this.gitHubLookupService = gitHubLookupService;
     }
 
-    @Override
-    public void run(String... args) throws Exception {
-        // Start the clock
-        long start = System.currentTimeMillis();
 
+    @GetMapping("/test")
+    public ResponseEntity<String> createOrUpdate() throws Exception {
+
+            this.gitHubLookupService = gitHubLookupService;
+        //        // Start the clock
+        long start = System.currentTimeMillis();
+//
         // Kick of multiple, asynchronous lookups
         CompletableFuture<User> page1 = gitHubLookupService.findUser("PivotalSoftware");
         CompletableFuture<User> page2 = gitHubLookupService.findUser("CloudFoundry");
@@ -31,12 +36,12 @@ public class AppRunner implements CommandLineRunner {
         // Wait until they are all done
         CompletableFuture.allOf(page1,page2,page3).join();
 
-        // Print results, including elapsed time
+      // Print results, including elapsed time
         logger.info("Elapsed time: " + (System.currentTimeMillis() - start));
         logger.info("--> " + page1.get());
         logger.info("--> " + page2.get());
         logger.info("--> " + page3.get());
-
+        return ResponseEntity.ok("OK");
     }
 
 }
